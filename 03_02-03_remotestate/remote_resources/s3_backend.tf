@@ -6,7 +6,7 @@ variable "aws_access_key" {}
 variable "aws_secret_key" {}
 
 variable "bucket_name" {
-  default = "red30-tfstate"
+  default = "red30-tfstate-bucket"
 }
 
 # //////////////////////////////
@@ -31,13 +31,32 @@ data "aws_iam_user" "terraform" {
 resource "aws_s3_bucket" "red30-tfremotestate" {
   bucket = var.bucket_name
   force_destroy = true
-  acl = "private"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "red30-tfremotestate" {
+  bucket = aws_s3_bucket.red30-tfremotestate.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  # Grant read/write access to the terraform user
+
+resource "aws_s3_bucket_ownership_controls" "red30-tfremotestate" {
+  bucket = aws_s3_bucket.red30-tfremotestate.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "red30-tfremotestate" {
+   depends_on = [aws_s3_bucket_ownership_controls.red30-tfremotestate]
+  bucket = aws_s3_bucket.red30-tfremotestate.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_policy" "red30-tfremotestate"{
+ bucket = aws_s3_bucket.red30-tfremotestate.id
+   # Grant read/write access to the terraform user
   policy = <<EOF
 {
     "Version": "2008-10-17",
