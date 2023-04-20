@@ -10,4 +10,5 @@
 respective ids.
 - Once all this is done, go back to the jenkins dashboard and run your pipeline,(click build now).
 - Your pipelines should run all the way to the last one successfully.
- 
+
+![pipeline image](./pipeline.png)
